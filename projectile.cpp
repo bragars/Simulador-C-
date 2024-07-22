@@ -45,7 +45,7 @@ public:
     float diameter = this->shape.getRadius() * 2;
 
     sf::Vector2f ball_position = this->getPosition();
-    return ball_position.y < size.y && +ball_position.y + diameter >= size.y;
+    return ball_position.y < size.y && ball_position.y + diameter >= size.y;
   }
 
   void gravity(sf::Vector2u size, float dt, int count)
@@ -57,10 +57,9 @@ public:
               this->getVelocity().x,
               this->getVelocity().y + (abs(GRAVITY * dt * count) + (20 * count))));
     }
-
-    if (ball_is_in_bottom_edge(size) && this->getMass() > 500)
+    else
     {
-      this->setVelocity(sf::Vector2f(0, 0));
+      this->setVelocity(sf::Vector2f(this->getVelocity().x, 0));
     }
   }
 
@@ -130,6 +129,7 @@ public:
   sf::RectangleShape cannonBarrel;
   sf::CircleShape cannonWheel;
 
+  int cylinderQnt = 0;
   float rotationAngle;
 
   Cannon(sf::Vector2f base, sf::Vector2f barrel, float wheel, float rotationAngle)
@@ -164,24 +164,60 @@ public:
     cannonBarrel.rotate(rotationAngle);
     cannonWheel.rotate(rotationAngle);
   }
+
+  void setCylinderQnt(int cylinderQnt)
+  {
+    this->cylinderQnt = cylinderQnt;
+  }
 };
 
 int main()
 {
   sf::RenderWindow window(sf::VideoMode(1800, 900), "Simple Simulator");
-  Ball ball = Ball(20.f, sf::Vector2(100.f, 550.f), sf::Vector2(500.f, 100.f), 50, sf::Color::Red);
-  ball.setMass(600);
 
   Cannon cannon = Cannon(
       sf::Vector2f(50.f, 20.f),
       sf::Vector2f(100.f, 20.f),
       20.f, -10.f);
 
+  cannon.setCylinderQnt(10);
+
+  std::vector<Ball> balls;
+  for (size_t i = 0; i < cannon.cylinderQnt; i++)
+  {
+    Ball ball = Ball(20.f, sf::Vector2(100.f + 2 * i, 550.f + 2 * i), sf::Vector2(500.f + 2 * i, 100.f + 2 * i), 50, sf::Color::Red);
+    ball.setMass(600);
+    balls.push_back(ball);
+  }
+
   bool is_firing = false;
   bool fired = false;
 
+  int current_ball_nmbr = cannon.cylinderQnt - 1;
+
+  std::cout << "balls.size(): " << balls.size() << std::endl;
+  std::cout << "current_ball_nmbr: " << current_ball_nmbr << std::endl;
+
   // Clock for timing
   sf::Clock clock;
+
+  sf::Font font;
+  font.loadFromFile("roboto.ttf");
+
+  sf::Text ball_count;
+  ball_count.setFont(font);
+
+  std::ostringstream oss;
+  oss << "Remaining: " << current_ball_nmbr;
+  ball_count.setString(oss.str());
+  oss.str("");
+
+  ball_count.setCharacterSize(24);
+  ball_count.setFillColor(sf::Color::White);
+  ball_count.setStyle(sf::Text::Bold);
+
+  ball_count.setPosition(100.f, 100.f);
+  Ball current_ball = balls.at(current_ball_nmbr);
 
   // Start the game loop
   while (window.isOpen())
@@ -190,24 +226,22 @@ int main()
     sf::Time deltaTime = clock.restart();
     float dt = deltaTime.asSeconds();
 
-    if (is_firing) {
-      ball.gravity(window.getSize(), dt, 1);
-    }
-
     if (is_firing)
     {
-      sf::Vector2f ball_pos = ball.getPosition();
+      sf::Vector2f ball_pos = current_ball.getPosition();
       sf::FloatRect cannonAngle = cannon.cannonBarrel.getGlobalBounds();
 
-      if (!fired) {
+      if (!fired)
+      {
         ball_pos.y = cannonAngle.top;
         fired = true;
       }
 
-      ball_pos.x += ball.getVelocity().x * dt;
-      ball_pos.y += ball.getVelocity().y * dt;
+      ball_pos.x += current_ball.getVelocity().x * dt;
+      ball_pos.y += current_ball.getVelocity().y * dt;
 
-      ball.setPosition(ball_pos);
+      current_ball.setPosition(ball_pos);
+      current_ball.gravity(window.getSize(), dt, 1);
     }
 
     // Process events
@@ -223,6 +257,17 @@ int main()
         // attack
         std::cout << "mouse button pressed" << std::endl;
         is_firing = true;
+
+        if (current_ball_nmbr >= 1)
+        {
+          current_ball_nmbr--;
+        }
+
+        oss << "Remaining: " << current_ball_nmbr;
+        ball_count.setString(oss.str());
+        oss.str("");
+
+        current_ball = balls.at(current_ball_nmbr);
       }
 
       else if (event.type == sf::Event::KeyPressed)
@@ -233,6 +278,11 @@ int main()
       }
     }
 
+    if (current_ball.getVelocity() == sf::Vector2f(0, 0))
+    {
+      is_firing = false;
+    }
+
     // Clear screen
     window.clear();
 
@@ -240,10 +290,11 @@ int main()
     window.draw(cannon.cannonBase);
     window.draw(cannon.cannonWheel);
     window.draw(cannon.cannonBarrel);
+    window.draw(ball_count);
 
     if (is_firing)
     {
-      window.draw(ball.shape);
+      window.draw(current_ball.shape);
     }
 
     // Update the window
