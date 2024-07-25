@@ -24,6 +24,8 @@ public:
     this->mass = mass;
   }
 
+  Ball() {}
+
   void windowBounce(sf::Vector2u size, sf::Vector2f ball_position)
   {
     float diameter = this->shape.getRadius() * 2;
@@ -48,7 +50,7 @@ public:
     return ball_position.y < size.y && ball_position.y + diameter >= size.y;
   }
 
-  void gravity(sf::Vector2u size, float dt, int count)
+  void gravity(sf::Vector2u size, float dt, int count, bool &is_firing)
   {
     if (!ball_is_in_bottom_edge(size))
     {
@@ -59,7 +61,11 @@ public:
     }
     else
     {
-      this->setVelocity(sf::Vector2f(this->getVelocity().x, 0));
+      this->setPosition(sf::Vector2f(0, this->getPosition().y));
+
+      // fade away after 3 SECONDS
+      sleep(1);
+      is_firing = false;
     }
   }
 
@@ -131,6 +137,7 @@ public:
 
   int cylinderQnt = 0;
   float rotationAngle;
+  float force;
 
   Cannon(sf::Vector2f base, sf::Vector2f barrel, float wheel, float rotationAngle)
   {
@@ -157,6 +164,11 @@ public:
   {
     return rotationAngle;
   }
+  
+  float getForce()
+  {
+    return force;
+  }
 
   void setAngle(float rotationAngle)
   {
@@ -169,31 +181,39 @@ public:
   {
     this->cylinderQnt = cylinderQnt;
   }
+
+  void setForce(float force)
+  {
+    this->force = force;
+  }
 };
 
 int main()
 {
-  sf::RenderWindow window(sf::VideoMode(1800, 900), "Simple Simulator");
+  sf::RenderWindow window(sf::VideoMode(1200, 650), "Simple Simulator");
+  // sf::RenderWindow window(sf::VideoMode(1800, 900), "Simple Simulator");
 
   Cannon cannon = Cannon(
       sf::Vector2f(50.f, 20.f),
       sf::Vector2f(100.f, 20.f),
       20.f, -10.f);
 
-  cannon.setCylinderQnt(10);
+  cannon.setCylinderQnt(6);
+  cannon.setForce(2);
 
-  std::vector<Ball> balls;
-  for (size_t i = 0; i < cannon.cylinderQnt; i++)
+  std::vector<Ball> balls = std::vector(cannon.cylinderQnt + 1, Ball());
+
+  for (int i = 1; i <= cannon.cylinderQnt; i++)
   {
     Ball ball = Ball(20.f, sf::Vector2(100.f + 2 * i, 550.f + 2 * i), sf::Vector2(500.f + 2 * i, 100.f + 2 * i), 50, sf::Color::Red);
     ball.setMass(600);
-    balls.push_back(ball);
+    balls[i] = ball;
   }
 
   bool is_firing = false;
   bool fired = false;
 
-  int current_ball_nmbr = cannon.cylinderQnt - 1;
+  int current_ball_nmbr = cannon.cylinderQnt;
 
   std::cout << "balls.size(): " << balls.size() << std::endl;
   std::cout << "current_ball_nmbr: " << current_ball_nmbr << std::endl;
@@ -208,7 +228,7 @@ int main()
   ball_count.setFont(font);
 
   std::ostringstream oss;
-  oss << "Remaining: " << current_ball_nmbr;
+  oss << "Remaining: " << current_ball_nmbr - 1;
   ball_count.setString(oss.str());
   oss.str("");
 
@@ -217,7 +237,7 @@ int main()
   ball_count.setStyle(sf::Text::Bold);
 
   ball_count.setPosition(100.f, 100.f);
-  Ball current_ball = balls.at(current_ball_nmbr);
+  Ball current_ball = balls.at(0);
 
   // Start the game loop
   while (window.isOpen())
@@ -237,11 +257,11 @@ int main()
         fired = true;
       }
 
-      ball_pos.x += current_ball.getVelocity().x * dt;
-      ball_pos.y += current_ball.getVelocity().y * dt;
+      ball_pos.x += current_ball.getVelocity().x * (cannon.getForce() * dt);
+      ball_pos.y += current_ball.getVelocity().y * (cannon.getForce() * dt);
 
+      current_ball.gravity(window.getSize(), dt, 1, is_firing);
       current_ball.setPosition(ball_pos);
-      current_ball.gravity(window.getSize(), dt, 1);
     }
 
     // Process events
@@ -254,33 +274,15 @@ int main()
 
       else if (event.type == sf::Event::MouseButtonPressed)
       {
-        // attack
-        std::cout << "mouse button pressed" << std::endl;
-        is_firing = true;
-
-        if (current_ball_nmbr >= 1)
+        if (current_ball_nmbr > 1)
         {
+          is_firing = true;
           current_ball_nmbr--;
         }
 
-        oss << "Remaining: " << current_ball_nmbr;
-        ball_count.setString(oss.str());
-        oss.str("");
-
         current_ball = balls.at(current_ball_nmbr);
+        fired = false;
       }
-
-      else if (event.type == sf::Event::KeyPressed)
-      {
-        // attack
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-          std::cout << "key pressed" << std::endl;
-      }
-    }
-
-    if (current_ball.getVelocity() == sf::Vector2f(0, 0))
-    {
-      is_firing = false;
     }
 
     // Clear screen
@@ -290,12 +292,17 @@ int main()
     window.draw(cannon.cannonBase);
     window.draw(cannon.cannonWheel);
     window.draw(cannon.cannonBarrel);
-    window.draw(ball_count);
 
-    if (is_firing)
+    if (is_firing && current_ball_nmbr > 0)
     {
+      oss << "Remaining: " << current_ball_nmbr - 1;
+      ball_count.setString(oss.str());
+      oss.str("");
+
       window.draw(current_ball.shape);
     }
+
+    window.draw(ball_count);
 
     // Update the window
     window.display();
