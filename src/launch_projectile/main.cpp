@@ -8,6 +8,8 @@
 #include "../../include/objects/Ball.hpp"
 #include "../../include/objects/Cannon.hpp"
 
+// std::ios_base::sync_with_stdio(false)
+
 int main()
 {
   sf::RenderWindow window(sf::VideoMode(1200, 650), "Simple Simulator");

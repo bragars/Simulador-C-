@@ -1,4 +1,5 @@
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -30,7 +31,10 @@ int main()
 
   // Info
   sf::Font font;
-  font.loadFromFile("./fonts/roboto.ttf");
+  if (!font.loadFromFile("../../include/fonts/roboto.ttf")) 
+  {
+    std::cerr << "Error loading font!" << std::endl;
+  }
 
   sf::Text fst_ball_x, fst_ball_y, snd_ball_x, snd_ball_y;
 

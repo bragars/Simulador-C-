@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <iostream>
 
 int main()
 {
@@ -17,11 +18,10 @@ int main()
 
   // Create text
   sf::Font font;
-  // if (!font.loadFromFile("roboto.ttf")) 
-  // {
-  //   // error
-  // }
-  font.loadFromFile("./fonts/roboto.ttf");
+  if (!font.loadFromFile("../../include/fonts/roboto.ttf"))
+  {
+    std::cerr << "Error loading font!" << std::endl;
+  }
 
   sf::Text text;
   text.setFont(font);
