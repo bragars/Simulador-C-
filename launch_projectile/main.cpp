@@ -222,7 +222,11 @@ int main()
   sf::Clock clock;
 
   sf::Font font;
-  font.loadFromFile("roboto.ttf");
+  font.loadFromFile("./fonts/roboto.ttf");
+  // if (!font.loadFromFile("./fonts/roboto.ttf")) {
+  //   std::cerr << "Error loading font!" << std::endl;
+  //   // Handle the error appropriately
+  // }
 
   sf::Text ball_count;
   ball_count.setFont(font);
