@@ -7,14 +7,13 @@
 #include <iostream>
 #include "../../include/objects/Ball.hpp"
 #include "../../include/objects/Cannon.hpp"
+#include "../../include/constants/screens.hpp"
+#include "../../include/components/backButton/main.hpp"
 
 // std::ios_base::sync_with_stdio(false)
 
-int main()
+void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
 {
-  sf::RenderWindow window(sf::VideoMode(1200, 650), "Simple Simulator");
-  // sf::RenderWindow window(sf::VideoMode(1800, 900), "Simple Simulator");
-
   Cannon cannon = Cannon(
       sf::Vector2f(50.f, 20.f),
       sf::Vector2f(100.f, 20.f),
@@ -44,7 +43,7 @@ int main()
   sf::Clock clock;
 
   sf::Font font;
-  if (!font.loadFromFile("../../include/fonts/roboto.ttf"))
+  if (!font.loadFromFile("include/fonts/roboto.ttf"))
   {
     std::cerr << "Error loading font!" << std::endl;
   }
@@ -64,74 +63,72 @@ int main()
   ball_count.setPosition(100.f, 100.f);
   Ball current_ball = balls.at(0);
 
-  // Start the game loop
-  while (window.isOpen())
+  // Get the elapsed time
+  sf::Time deltaTime = clock.restart();
+  float dt = deltaTime.asSeconds();
+
+  BackButton backButton = BackButton();
+  backButton.backButtonAction(currentScreen, window);
+
+  if (is_firing)
   {
-    // Get the elapsed time
-    sf::Time deltaTime = clock.restart();
-    float dt = deltaTime.asSeconds();
+    sf::Vector2f ball_pos = current_ball.getPosition();
+    sf::FloatRect cannonAngle = cannon.cannonBarrel.getGlobalBounds();
 
-    if (is_firing)
+    if (!fired)
     {
-      sf::Vector2f ball_pos = current_ball.getPosition();
-      sf::FloatRect cannonAngle = cannon.cannonBarrel.getGlobalBounds();
-
-      if (!fired)
-      {
-        ball_pos.y = cannonAngle.top;
-        fired = true;
-      }
-
-      ball_pos.x += current_ball.getVelocity().x * (cannon.getForce() * dt);
-      ball_pos.y += current_ball.getVelocity().y * (cannon.getForce() * dt);
-
-      current_ball.gravity(window.getSize(), dt, 1, is_firing);
-      current_ball.setPosition(ball_pos);
+      ball_pos.y = cannonAngle.top;
+      fired = true;
     }
 
-    // Process events
-    sf::Event event;
-    while (window.pollEvent(event))
-    {
-      // Close window: exit
-      if (event.type == sf::Event::Closed)
-        window.close();
+    ball_pos.x += current_ball.getVelocity().x * (cannon.getForce() * dt);
+    ball_pos.y += current_ball.getVelocity().y * (cannon.getForce() * dt);
 
-      else if (event.type == sf::Event::MouseButtonPressed)
-      {
-        if (current_ball_nmbr > 1)
-        {
-          is_firing = true;
-          current_ball_nmbr--;
-        }
-
-        current_ball = balls.at(current_ball_nmbr);
-        fired = false;
-      }
-    }
-
-    // Clear screen
-    window.clear();
-
-    // Draw the cannon
-    window.draw(cannon.cannonBase);
-    window.draw(cannon.cannonWheel);
-    window.draw(cannon.cannonBarrel);
-
-    if (is_firing && current_ball_nmbr > 0)
-    {
-      oss << "Remaining: " << current_ball_nmbr - 1;
-      ball_count.setString(oss.str());
-      oss.str("");
-
-      window.draw(current_ball.shape);
-    }
-
-    window.draw(ball_count);
-
-    // Update the window
-    window.display();
+    current_ball.gravity(window.getSize(), dt, 1, is_firing);
+    current_ball.setPosition(ball_pos);
   }
 
-  return 0;
+  // // Process events
+  // sf::Event event;
+  // while (window.pollEvent(event))
+  // {
+  //   // Close window: exit
+  //   if (event.type == sf::Event::Closed)
+  //     window.close();
+
+  //   else if (event.type == sf::Event::MouseButtonPressed)
+  //   {
+  //     if (current_ball_nmbr > 1)
+  //     {
+  //       is_firing = true;
+  //       current_ball_nmbr--;
+  //     }
+
+  //     current_ball = balls.at(current_ball_nmbr);
+  //     fired = false;
+  //   }
+  // }
+
+  // Clear screen
+  window.clear();
+
+  // Draw the cannon
+  window.draw(cannon.cannonBase);
+  window.draw(cannon.cannonWheel);
+  window.draw(cannon.cannonBarrel);
+
+  if (is_firing && current_ball_nmbr > 0)
+  {
+    oss << "Remaining: " << current_ball_nmbr - 1;
+    ball_count.setString(oss.str());
+    oss.str("");
+
+    window.draw(current_ball.shape);
+  }
+
+  window.draw(ball_count);
+  backButton.drawBackButton(window);
+
+  // Update the window
+  window.display();
 }

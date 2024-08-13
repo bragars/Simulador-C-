@@ -12,7 +12,7 @@ SFML_LIB_DIR = /usr/local/lib
 SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
 
 # Source files
-SRCS = main.cpp ../../include/components/main.hpp
+SRCS = src/interface/main.cpp include/components/backButton/main.cpp
 
 # Output binary
 TARGET = sfml-app
