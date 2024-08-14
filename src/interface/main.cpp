@@ -139,6 +139,7 @@ void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen)
         // Change to the start screen
         std::cout << "Back to menu" << std::endl;
         currentScreen = Screen::MainMenu;
+        return;
       }
       for (size_t i = 0; i < simulations.size(); i++)
       {
@@ -146,7 +147,8 @@ void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen)
         {
           // Handle the respective simulation action
           std::cout << "pressed: " << i << std::endl;
-          currentScreen = static_cast<Screen>(i);
+          currentScreen = static_cast<Screen>(i + 3);
+          return;
         }
       }
     }

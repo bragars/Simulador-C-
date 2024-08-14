@@ -4,6 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include "main.cpp"
 
-void handleBounceBall(sf::RenderWindow &window, Screen &currentScreen);
+void handleFallenBalls(sf::RenderWindow &window, Screen &currentScreen);
 
 #endif // FALLEN_BALLS_HPP

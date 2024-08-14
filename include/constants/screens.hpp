@@ -9,7 +9,9 @@ enum class Screen
   Settings,
   BounceBall,
   LaunchProjectile,
-  BallAndSquareCollision
+  BallAndSquareCollision,
+  ElasticCollision,
+  FallenBalls
 };
 
 #endif
