@@ -3,6 +3,8 @@
 #include "../bounce_ball/main.hpp"
 #include "../launch_projectile/main.hpp"
 #include "../collision_ball_and_square/main.hpp"
+#include "../elastic_collision/main.hpp"
+#include "../fallen_balls/main.hpp"
 #include "../../include/constants/screens.hpp"
 #include "../../include/components/backButton/main.hpp"
 
@@ -14,6 +16,15 @@ void handleMainMenu(sf::RenderWindow &window, enum Screen &currentScreen);
 
 // Function to handle input and rendering of the settings screen
 void handleSettings(sf::RenderWindow &window, enum Screen &currentScreen);
+
+// Helper function to center text inside a rectangle
+void centerTextInRectangle(sf::Text &text, const sf::RectangleShape &rectangle)
+{
+  sf::FloatRect textRect = text.getLocalBounds();
+  text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+  text.setPosition(rectangle.getPosition().x + rectangle.getSize().x / 2.0f,
+                   rectangle.getPosition().y + rectangle.getSize().y / 2.0f);
+}
 
 void handleMainMenu(sf::RenderWindow &window, enum Screen &currentScreen)
 {
@@ -74,129 +85,84 @@ void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen)
   }
 
   sf::Color Gray(128, 128, 128);
+  // Title and back button
+  sf::Text title("Simulations", font, 50);
+  title.setPosition(300, 50);
 
-  static sf::Text title("Simulations", font, 50);
-  title.setPosition(300, 100);
+  sf::Text backButton("Back to Menu", font, 30);
+  backButton.setPosition(300, 500);
 
-  static sf::Text backButton("Back to Menu", font, 30);
-  backButton.setPosition(300, 400);
+  // Simulations setup
+  std::vector<sf::RectangleShape> simulations;
+  std::vector<sf::Text> simulationTexts;
 
-  sf::Vector2f rectangleSize = sf::Vector2f(100.f, 40.f);
+  std::vector<std::string> simulationLabels = {"Bounce Ball", "Projectile", "Ball & Square", "ElasticCollision", "FallenBalls"};
 
-  static sf::RectangleShape simulation(rectangleSize);
-  simulation.setFillColor(Gray);
-  simulation.setPosition(300, 200);
+  sf::Vector2f rectangleSize(100.f, 40.f);
+  int columns = 2;
+  int spacing = 20;
+  int startX = 150;
+  int startY = 150;
 
-  sf::Text text;
-  text.setFont(font);
-  text.setString("Bounce Ball");
-  text.setCharacterSize(20);
-  text.setFillColor(sf::Color::White);
-
-  sf::FloatRect textRect = text.getLocalBounds();
-  text.setOrigin(textRect.left + textRect.width / 2.0f,
-                 textRect.top + textRect.height / 2.0f);
-  text.setPosition(simulation.getPosition().x + rectangleSize.x / 2.0f,
-                   simulation.getPosition().y + rectangleSize.y / 2.0f);
-
-  static sf::RectangleShape simulation2(rectangleSize);
-  simulation2.setFillColor(Gray);
-  simulation2.setPosition(300, 250);
-
-  sf::Text text2;
-  text2.setFont(font);
-  text2.setString("Launch Projectile");
-  text2.setCharacterSize(20);
-  text2.setFillColor(sf::Color::White);
-
-  sf::FloatRect text2Rect = text2.getLocalBounds();
-  text2.setOrigin(text2Rect.left + text2Rect.width / 2.0f,
-                  text2Rect.top + text2Rect.height / 2.0f);
-  text2.setPosition(simulation2.getPosition().x + rectangleSize.x / 2.0f,
-                    simulation2.getPosition().y + rectangleSize.y / 2.0f);
-
-  static sf::RectangleShape simulation3(rectangleSize);
-  simulation3.setFillColor(Gray);
-  simulation3.setPosition(300, 320);
-
-  sf::Text text3;
-  text3.setFont(font);
-  text3.setString("Ball and square collision");
-  text3.setCharacterSize(20);
-  text3.setFillColor(sf::Color::White);
-
-  sf::FloatRect text3Rect = text3.getLocalBounds();
-  text3.setOrigin(text3Rect.left + text3Rect.width / 2.0f,
-                  text3Rect.top + text3Rect.height / 2.0f);
-  text2.setPosition(simulation3.getPosition().x + rectangleSize.x / 2.0f,
-                    simulation3.getPosition().y + rectangleSize.y / 2.0f);
-
-  // static std::vector<sf::RectangleShape> simulations(4);
-  // static bool rectanglesInitialized = false;
-
-  // if (!rectanglesInitialized)
-  // {
-  //     for (size_t i = 0; i < simulations.size(); i++)
-  //     {
-  //         sf::RectangleShape &simulation = simulations[i];
-  //         simulation.setSize(rectangleSize);
-  //         simulation.setFillColor(sf::Color::Green);
-
-  //         int x = 200 + (i % 3) * 120;
-  //         int y = 200 + (i / 3) * 120;
-
-  //         simulation.setPosition(x, y);
-  //     }
-  //     rectanglesInitialized = true;
-  // }
-
-  // Check for mouse clicks
-  if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+  for (size_t i = 0; i < simulationLabels.size(); i++)
   {
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    if (backButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
-    {
-      // Change to the start screen
-      currentScreen = Screen::MainMenu;
-    }
-    if (simulation.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
-    {
-      // Change to the start screen
-      currentScreen = Screen::BounceBall;
-    }
-    if (simulation2.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
-    {
-      // Change to the start screen
-      currentScreen = Screen::LaunchProjectile;
-    }
-    if (simulation3.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
-    {
-      // Change to the start screen
-      currentScreen = Screen::BallAndSquareCollision;
-    }
-    // for (size_t i = 3; i < 7; i++)
-    // {
-    //   sf::RectangleShape &simulation = simulations[i];
-    //   if (simulation.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
-    //   {
-    //     currentScreen = static_cast<Screen>(i);
-    //   }
-    // }
+    sf::RectangleShape simulation(rectangleSize);
+    simulation.setFillColor(Gray);
+
+    int x = startX + (i % columns) * (rectangleSize.x + spacing);
+    int y = startY + (i / columns) * (rectangleSize.y + spacing);
+
+    simulation.setPosition(x, y);
+    simulations.push_back(simulation);
+
+    sf::Text text(simulationLabels[i], font, 20);
+    text.setFillColor(sf::Color::White);
+    centerTextInRectangle(text, simulation);
+    simulationTexts.push_back(text);
   }
 
-  // Draw elements
-  window.draw(title);
-  window.draw(backButton);
-  window.draw(simulation);
-  window.draw(text);
-  window.draw(simulation2);
-  window.draw(text2);
-  window.draw(simulation3);
-  window.draw(text3);
-  // for (const auto &simulation : simulations)
-  // {
-  //     window.draw(simulation);
-  // }
+  while (window.isOpen())
+  {
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+      if (event.type == sf::Event::Closed)
+        window.close();
+    }
+
+    // Check for mouse clicks
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    {
+      sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+      if (backButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
+      {
+        // Change to the start screen
+        std::cout << "Back to menu" << std::endl;
+        currentScreen = Screen::MainMenu;
+      }
+      for (size_t i = 0; i < simulations.size(); i++)
+      {
+        if (simulations[i].getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
+        {
+          // Handle the respective simulation action
+          std::cout << "pressed: " << i << std::endl;
+          currentScreen = static_cast<Screen>(i);
+        }
+      }
+    }
+
+    window.clear();
+    window.draw(title);
+    window.draw(backButton);
+
+    for (size_t i = 0; i < simulations.size(); i++)
+    {
+      window.draw(simulations[i]);
+      window.draw(simulationTexts[i]);
+    }
+
+    window.display();
+  }
 }
 
 void handleSettings(sf::RenderWindow &window, enum Screen &currentScreen)
@@ -236,7 +202,7 @@ void handleSettings(sf::RenderWindow &window, enum Screen &currentScreen)
 
 int main()
 {
-  sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Application");
+  sf::RenderWindow window(sf::VideoMode(900, 600), "SFML Application");
   window.setVerticalSyncEnabled(true);
 
   Screen currentScreen = Screen::MainMenu;
@@ -254,11 +220,11 @@ int main()
       // Handle input and update state based on the current screen
       switch (currentScreen)
       {
-      case Screen::Start:
-        handleStartScreen(window, currentScreen);
-        break;
       case Screen::MainMenu:
         handleMainMenu(window, currentScreen);
+        break;
+      case Screen::Start:
+        handleStartScreen(window, currentScreen);
         break;
       case Screen::Settings:
         handleSettings(window, currentScreen);
@@ -272,13 +238,12 @@ int main()
       case Screen::BallAndSquareCollision:
         handleBallAndSquareCollision(window, currentScreen);
         break;
-        // case Screen::ElasticCollision:
-        //   handleElasticCollision(window, currentScreen);
-        //   break;
-        // case Screen::FallenBalls:
-        //   handleFallenBalls(window, currentScreen);
-        //   break;
-        // }
+      case Screen::ElasticCollision:
+        handleElasticCollision(window, currentScreen);
+        break;
+      case Screen::FallenBalls:
+        handleFallenBalls(window, currentScreen);
+        break;
       }
     }
 
@@ -286,11 +251,11 @@ int main()
     window.clear();
     switch (currentScreen)
     {
-    case Screen::Start:
-      handleStartScreen(window, currentScreen);
-      break;
     case Screen::MainMenu:
       handleMainMenu(window, currentScreen);
+      break;
+    case Screen::Start:
+      handleStartScreen(window, currentScreen);
       break;
     case Screen::Settings:
       handleSettings(window, currentScreen);
@@ -303,6 +268,12 @@ int main()
       break;
     case Screen::BallAndSquareCollision:
       handleBallAndSquareCollision(window, currentScreen);
+      break;
+    case Screen::ElasticCollision:
+      handleElasticCollision(window, currentScreen);
+      break;
+    case Screen::FallenBalls:
+      handleFallenBalls(window, currentScreen);
       break;
     }
     window.display();
