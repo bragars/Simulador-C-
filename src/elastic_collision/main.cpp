@@ -10,23 +10,14 @@
 void handleElasticCollision(sf::RenderWindow &window, Screen &currentScreen)
 {
   // Create a circle shape (the ball)
-  Ball first_ball(20.f, sf::Vector2(100.f, 100.f), sf::Vector2(500.f, 0.f), 50, sf::Color::Green);
-  Ball second_ball(50.f, sf::Vector2(300.f, 100.f), sf::Vector2(100.f, 0.f), 200, sf::Color::Red);
+  static Ball first_ball(20.f, sf::Vector2(100.f, 100.f), sf::Vector2(500.f, 0.f), 50, sf::Color::Green);
+  static Ball second_ball(50.f, sf::Vector2(300.f, 100.f), sf::Vector2(100.f, 0.f), 200, sf::Color::Red);
 
-  BackButton backButton = BackButton();
+  static BackButton backButton = BackButton();
   backButton.backButtonAction(currentScreen, window);
 
   // Clock for timing
-  sf::Clock clock;
-
-  // Process events
-  sf::Event event;
-  while (window.pollEvent(event))
-  {
-    // Close window: exit
-    if (event.type == sf::Event::Closed)
-      window.close();
-  }
+  static sf::Clock clock;
 
   // Get the elapsed time
   sf::Time deltaTime = clock.restart();

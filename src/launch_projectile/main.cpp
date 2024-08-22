@@ -14,7 +14,7 @@
 
 void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
 {
-  Cannon cannon = Cannon(
+  static Cannon cannon = Cannon(
       sf::Vector2f(50.f, 20.f),
       sf::Vector2f(100.f, 20.f),
       20.f, -10.f);
@@ -22,7 +22,7 @@ void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
   cannon.setCylinderQnt(6);
   cannon.setForce(2);
 
-  std::vector<Ball> balls = std::vector(cannon.cylinderQnt + 1, Ball());
+  static std::vector<Ball> balls = std::vector(cannon.cylinderQnt + 1, Ball());
 
   for (int i = 1; i <= cannon.cylinderQnt; i++)
   {
@@ -40,7 +40,7 @@ void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
   std::cout << "current_ball_nmbr: " << current_ball_nmbr << std::endl;
 
   // Clock for timing
-  sf::Clock clock;
+  static sf::Clock clock;
 
   sf::Font font;
   if (!font.loadFromFile("include/fonts/roboto.ttf"))
@@ -61,7 +61,7 @@ void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
   ball_count.setStyle(sf::Text::Bold);
 
   ball_count.setPosition(100.f, 100.f);
-  Ball current_ball = balls.at(0);
+  static Ball current_ball = balls.at(0);
 
   // Get the elapsed time
   sf::Time deltaTime = clock.restart();
@@ -89,25 +89,21 @@ void handleLaunchProjectile(sf::RenderWindow &window, Screen &currentScreen)
   }
 
   // // Process events
-  // sf::Event event;
-  // while (window.pollEvent(event))
-  // {
-  //   // Close window: exit
-  //   if (event.type == sf::Event::Closed)
-  //     window.close();
+  sf::Event event;
+  while (window.pollEvent(event))
+  {
+    if (event.type == sf::Event::MouseButtonPressed)
+    {
+      if (current_ball_nmbr > 1)
+      {
+        is_firing = true;
+        current_ball_nmbr--;
+      }
 
-  //   else if (event.type == sf::Event::MouseButtonPressed)
-  //   {
-  //     if (current_ball_nmbr > 1)
-  //     {
-  //       is_firing = true;
-  //       current_ball_nmbr--;
-  //     }
-
-  //     current_ball = balls.at(current_ball_nmbr);
-  //     fired = false;
-  //   }
-  // }
+      current_ball = balls.at(current_ball_nmbr);
+      fired = false;
+    }
+  }
 
   // Clear screen
   window.clear();

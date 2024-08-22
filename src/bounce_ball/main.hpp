@@ -1,5 +1,5 @@
-#ifndef BOUNCE_BALL_H
-#define BOUNCE_BALL_H
+#ifndef BOUNCE_BALL_HPP
+#define BOUNCE_BALL_HPP
 
 #include <SFML/Graphics.hpp>
 #include "main.cpp"

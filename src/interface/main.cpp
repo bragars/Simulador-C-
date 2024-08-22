@@ -7,24 +7,7 @@
 #include "../fallen_balls/main.hpp"
 #include "../../include/constants/screens.hpp"
 #include "../../include/components/backButton/main.hpp"
-
-// Function to handle input and rendering of the start screen
-void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen);
-
-// Function to handle input and rendering of the main menu
-void handleMainMenu(sf::RenderWindow &window, enum Screen &currentScreen);
-
-// Function to handle input and rendering of the settings screen
-void handleSettings(sf::RenderWindow &window, enum Screen &currentScreen);
-
-// Helper function to center text inside a rectangle
-void centerTextInRectangle(sf::Text &text, const sf::RectangleShape &rectangle)
-{
-  sf::FloatRect textRect = text.getLocalBounds();
-  text.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-  text.setPosition(rectangle.getPosition().x + rectangle.getSize().x / 2.0f,
-                   rectangle.getPosition().y + rectangle.getSize().y / 2.0f);
-}
+#include "./main.hpp"
 
 void handleMainMenu(sf::RenderWindow &window, enum Screen &currentScreen)
 {
@@ -40,13 +23,13 @@ void handleMainMenu(sf::RenderWindow &window, enum Screen &currentScreen)
     fontLoaded = true;
   }
 
-  static sf::Text title("Welcome to the Game", font, 50);
+  static sf::Text title("Bem vindo ao EduSimulator", font, 50);
   title.setPosition(200, 100);
 
-  static sf::Text startButton("Start", font, 30);
+  static sf::Text startButton("Inicio", font, 30);
   startButton.setPosition(350, 300);
 
-  static sf::Text settingsButton("Settings", font, 30);
+  static sf::Text settingsButton("Configuracoes", font, 30);
   settingsButton.setPosition(350, 400);
 
   // Check for mouse clicks
@@ -86,23 +69,23 @@ void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen)
 
   sf::Color Gray(128, 128, 128);
   // Title and back button
-  sf::Text title("Simulations", font, 50);
+  sf::Text title("Simulacoes", font, 50);
   title.setPosition(300, 50);
 
-  sf::Text backButton("Back to Menu", font, 30);
+  sf::Text backButton("Voltar ao Menu", font, 30);
   backButton.setPosition(300, 500);
 
   // Simulations setup
   std::vector<sf::RectangleShape> simulations;
   std::vector<sf::Text> simulationTexts;
 
-  std::vector<std::string> simulationLabels = {"Bounce Ball", "Projectile", "Ball & Square", "ElasticCollision", "FallenBalls"};
+  std::vector<std::string> simulationLabels = {"Bola e Quadrado", "Bola Quicando", "Projetil", "Colisao Elastica", "Queda de bolas"};
 
-  sf::Vector2f rectangleSize(100.f, 40.f);
-  int columns = 2;
-  int spacing = 20;
-  int startX = 150;
-  int startY = 150;
+  sf::Vector2f rectangleSize(150.f, 60.f);
+  int columns = 3;
+  int spacing = 80;
+  int startX = 200;
+  int startY = 200;
 
   for (size_t i = 0; i < simulationLabels.size(); i++)
   {
@@ -137,7 +120,7 @@ void handleStartScreen(sf::RenderWindow &window, enum Screen &currentScreen)
       if (backButton.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos)))
       {
         // Change to the start screen
-        std::cout << "Back to menu" << std::endl;
+        std::cout << "Voltar ao Menu" << std::endl;
         currentScreen = Screen::MainMenu;
         return;
       }
@@ -180,10 +163,10 @@ void handleSettings(sf::RenderWindow &window, enum Screen &currentScreen)
     fontLoaded = true;
   }
 
-  static sf::Text title("Settings", font, 50);
+  static sf::Text title("Configuracoes", font, 50);
   title.setPosition(300, 100);
 
-  static sf::Text backButton("Back to Main Menu", font, 30);
+  static sf::Text backButton("Voltar ao Menu", font, 30);
   backButton.setPosition(250, 300);
 
   // Check for mouse clicks
@@ -231,14 +214,14 @@ int main()
       case Screen::Settings:
         handleSettings(window, currentScreen);
         break;
+      case Screen::BallAndSquareCollision:
+        handleBallAndSquareCollision(window, currentScreen);
+        break;
       case Screen::BounceBall:
         handleBounceBall(window, currentScreen);
         break;
       case Screen::LaunchProjectile:
         handleLaunchProjectile(window, currentScreen);
-        break;
-      case Screen::BallAndSquareCollision:
-        handleBallAndSquareCollision(window, currentScreen);
         break;
       case Screen::ElasticCollision:
         handleElasticCollision(window, currentScreen);
@@ -262,14 +245,14 @@ int main()
     case Screen::Settings:
       handleSettings(window, currentScreen);
       break;
+    case Screen::BallAndSquareCollision:
+      handleBallAndSquareCollision(window, currentScreen);
+      break;
     case Screen::BounceBall:
       handleBounceBall(window, currentScreen);
       break;
     case Screen::LaunchProjectile:
       handleLaunchProjectile(window, currentScreen);
-      break;
-    case Screen::BallAndSquareCollision:
-      handleBallAndSquareCollision(window, currentScreen);
       break;
     case Screen::ElasticCollision:
       handleElasticCollision(window, currentScreen);

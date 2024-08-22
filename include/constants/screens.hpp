@@ -7,9 +7,9 @@ enum class Screen
   Start,
   MainMenu,
   Settings,
+  BallAndSquareCollision,
   BounceBall,
   LaunchProjectile,
-  BallAndSquareCollision,
   ElasticCollision,
   FallenBalls
 };

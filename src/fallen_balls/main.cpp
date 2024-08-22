@@ -9,27 +9,19 @@
 
 void handleFallenBalls(sf::RenderWindow &window, Screen &currentScreen)
 {
-  BackButton backButton = BackButton();
+  static BackButton backButton = BackButton();
   backButton.backButtonAction(currentScreen, window);
 
-  std::vector<Ball> balls;
+  static std::vector<Ball> balls;
 
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 2; i++)
   {
-    balls.push_back(Ball(20.f, sf::Vector2(100.f * (i + 1), 50.f * (i + 1)), sf::Vector2(500.f, 100.f), 50, sf::Color::Green));
-  }
+    static Ball ball = Ball(20.f, sf::Vector2(100.f * (i + 1), 50.f * (i + 1)), sf::Vector2(500.f, 100.f), 50, sf::Color::Green);
+    balls.push_back(ball);
+  } 
 
   // Clock for timing
-  sf::Clock clock;
-
-  // Process events
-  sf::Event event;
-  while (window.pollEvent(event))
-  {
-    // Close window: exit
-    if (event.type == sf::Event::Closed)
-      window.close();
-  }
+  static sf::Clock clock;
 
   // Get the elapsed time
   sf::Time deltaTime = clock.restart();
@@ -37,6 +29,7 @@ void handleFallenBalls(sf::RenderWindow &window, Screen &currentScreen)
 
   bool is_firing = false;
   int count = 1;
+
   for (Ball &ball : balls)
   {
     ball.gravity(window.getSize(), dt, count, is_firing);

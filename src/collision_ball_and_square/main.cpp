@@ -1,29 +1,31 @@
-#include <sstream>
-#include <iostream>
-#include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <sstream>
+#include <iostream>
+#include <string>
+#include "main.hpp"
 #include "../../include/constants/screens.hpp"
 #include "../../include/components/backButton/main.hpp"
 
 void handleBallAndSquareCollision(sf::RenderWindow &window, Screen &currentScreen)
 {
   // Create a circle shape (the ball)
-  sf::CircleShape first_ball(20.f);
-  first_ball.setFillColor(sf::Color::Green);
-  first_ball.setPosition(200.f, 200.f);
+  static sf::CircleShape ball(20.f);
+  static sf::Vector2f velocity(200.f, 150.f); // 200 pixels/second horizontally, 150 pixels/second vertically
+  static bool initialized = false;
+
+  if (!initialized)
+  {
+    ball.setFillColor(sf::Color::Green);
+    ball.setPosition(100.f, 100.f);
+    initialized = true;
+  }
 
   // Create a rectangle shape
-  sf::RectangleShape rectangle;
+  static sf::RectangleShape rectangle;
   rectangle.setSize(sf::Vector2f(600.f, 300.f));
   rectangle.setPosition(400.f, 300.f);
-
-  // Velocity of the ball
-  sf::Vector2f fst_velocity(500.f, 350.f); // 200 pixels/second horizontally, 150 pixels/second vertically
-
-  // Clock for timing
-  sf::Clock clock;
 
   // Info
   sf::Font font;
@@ -32,6 +34,8 @@ void handleBallAndSquareCollision(sf::RenderWindow &window, Screen &currentScree
     std::cerr << "Error loading font!" << std::endl;
   }
 
+  // Clock for timing
+  static sf::Clock clock;
   sf::Text fst_ball_x, fst_ball_y, snd_ball_x, snd_ball_y;
 
   fst_ball_x.setFont(font);
@@ -54,25 +58,25 @@ void handleBallAndSquareCollision(sf::RenderWindow &window, Screen &currentScree
   rectangle.rotate(rotation_speed * dt);
 
   // Move the balls
-  sf::Vector2f first_ball_position = first_ball.getPosition();
-  first_ball_position += fst_velocity * dt;
+  sf::Vector2f position = ball.getPosition();
+  position += velocity * dt;
 
-  float diameter = first_ball.getRadius() * 2;
+  float diameter = ball.getRadius() * 2;
   std::ostringstream oss;
 
   // Check for collisions with the window borders and bounce for the first ball
-  if (first_ball_position.x <= 0 || first_ball_position.x + diameter >= window.getSize().x)
+  if (position.x <= 0 || position.x + diameter >= window.getSize().x)
   {
-    fst_velocity.x = -fst_velocity.x;
+    velocity.x = -velocity.x;
   }
 
-  if (first_ball_position.y <= 0 || first_ball_position.y + diameter >= window.getSize().y)
+  if (position.y <= 0 || position.y + diameter >= window.getSize().y)
   {
-    fst_velocity.y = -fst_velocity.y;
+    velocity.y = -velocity.y;
   }
 
   // Check for collisions with the rectangle for the first ball
-  sf::FloatRect ballBounds = first_ball.getGlobalBounds();
+  sf::FloatRect ballBounds = ball.getGlobalBounds();
   sf::FloatRect rectBounds = rectangle.getGlobalBounds();
 
   BackButton backButton = BackButton();
@@ -87,31 +91,31 @@ void handleBallAndSquareCollision(sf::RenderWindow &window, Screen &currentScree
     float rectBottom = rectBounds.top + rectBounds.height;
 
     // Check collision with the left or right side for the first ball
-    if ((first_ball_position.x < rectLeft && first_ball_position.x + diameter > rectLeft) ||
-        (first_ball_position.x < rectRight && first_ball_position.x + diameter > rectRight))
+    if ((position.x < rectLeft && position.x + diameter > rectLeft) ||
+        (position.x < rectRight && position.x + diameter > rectRight))
     {
-      fst_velocity.x = -500;
+      velocity.x = -500;
     }
 
     // Check collision with the top or bottom side for the first ball
-    if (first_ball_position.y < rectBottom && first_ball_position.y + diameter > rectBottom)
+    if (position.y < rectBottom && position.y + diameter > rectBottom)
     {
-      fst_velocity.y = 350;
+      velocity.y = 350;
     }
-    if (first_ball_position.y < rectTop && first_ball_position.y + diameter > rectTop)
+    if (position.y < rectTop && position.y + diameter > rectTop)
     {
-      fst_velocity.y = -350;
+      velocity.y = -350;
     }
   }
 
   // Update ball positions
-  first_ball.setPosition(first_ball_position);
+  ball.setPosition(position);
 
   // Update the texts with the positions of the balls
-  oss << "First Ball X: " << first_ball.getPosition().x;
+  oss << "First Ball X: " << ball.getPosition().x;
   fst_ball_x.setString(oss.str());
   oss.str("");
-  oss << "First Ball Y: " << first_ball.getPosition().y;
+  oss << "First Ball Y: " << ball.getPosition().y;
   fst_ball_y.setString(oss.str());
   oss.str("");
 
@@ -123,7 +127,7 @@ void handleBallAndSquareCollision(sf::RenderWindow &window, Screen &currentScree
   window.draw(fst_ball_y);
 
   // Draw the balls
-  window.draw(first_ball);
+  window.draw(ball);
 
   // Draw the rectangle
   window.draw(rectangle);

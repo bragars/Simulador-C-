@@ -26,11 +26,6 @@ void handleBounceBall(sf::RenderWindow &window, Screen &currentScreen)
   {
     std::cerr << "Error loading font!" << std::endl;
   }
-  text.setFont(font);
-  text.setString("Hello World");
-  text.setCharacterSize(24);
-  text.setFillColor(sf::Color::White);
-  text.setStyle(sf::Text::Bold);
 
   BackButton backButton = BackButton();
   backButton.backButtonAction(currentScreen, window);
@@ -62,7 +57,6 @@ void handleBounceBall(sf::RenderWindow &window, Screen &currentScreen)
   window.clear();
 
   // Draw the ball to hidden buffer
-  window.draw(text);
   window.draw(ball);
   backButton.drawBackButton(window);
 
